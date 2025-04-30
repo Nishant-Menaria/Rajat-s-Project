@@ -1,0 +1,138 @@
+import Student from '../models/Student.js';
+import Driver from '../models/Driver.js';
+import Admin  from '../models/Admin.js';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+
+// Get all students
+export const getAllStudents = async (req, res) => {
+  try {
+    const students = await Student.find();
+    res.status(200).json({ success: true, data: students });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+// Get all drivers
+export const getAllDrivers = async (req, res) => {
+  try {
+    const drivers = await Driver.find();
+    res.status(200).json({ success: true, data: drivers });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+// Add a new student
+export const addStudent = async (req, res) => {
+  try {
+    const newStudent = new Student(req.body);
+    console.log(newStudent);
+    await newStudent.save();
+    res.status(201).json({ success: true, data: newStudent });
+  } catch (err) {
+    res.status(400).json({ success: false, message: err.message });
+  }
+};
+
+// Add a new driver
+export const addDriver = async (req, res) => {
+  try {
+    const newDriver = new Driver(req.body);
+    await newDriver.save();
+    res.status(201).json({ success: true, data: newDriver });
+  } catch (err) {
+    res.status(400).json({ success: false, message: err.message });
+  }
+};
+
+// Update student
+export const updateStudent = async (req, res) => {
+  try {
+    const updated = await Student.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    res.status(200).json({ success: true, data: updated });
+  } catch (err) {
+    res.status(400).json({ success: false, message: err.message });
+  }
+};
+
+// Update driver
+export const updateDriver = async (req, res) => {
+  try {
+    const updated = await Driver.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    res.status(200).json({ success: true, data: updated });
+  } catch (err) {
+    res.status(400).json({ success: false, message: err.message });
+  }
+};
+
+// Delete student
+export const deleteStudent = async (req, res) => {
+  try {
+    await Student.findByIdAndDelete(req.params.id);
+    res.status(200).json({ success: true, message: 'Student deleted' });
+  } catch (err) {
+    res.status(400).json({ success: false, message: err.message });
+  }
+};
+
+// Delete driver
+export const deleteDriver = async (req, res) => {
+  try {
+    await Driver.findByIdAndDelete(req.params.id);
+    res.status(200).json({ success: true, message: 'Driver deleted' });
+  } catch (err) {
+    res.status(400).json({ success: false, message: err.message });
+  }
+};
+
+export const adminLogin = async (req, res) => {
+    const { email, password } = req.body;
+    const JWT_SECRET=process.env.JWT_SECRET;
+  
+    try {
+      // Check if the admin exists in the database
+      const admin = await Admin.findOne({ email });
+  
+      if (!admin) {
+        return res.status(401).json({ message: 'Invalid email or password' });
+      }
+  
+      // Compare the password with the stored hashed password
+      const isMatch = await bcrypt.compare(password, admin.password);
+      if (!isMatch) {
+        return res.status(401).json({ message: 'Invalid email or password' });
+      }
+  
+      // Generate JWT token with a payload (admin's id and email)
+      const token = jwt.sign(
+        { id: admin._id, email: admin.email },
+        JWT_SECRET,
+        { expiresIn: '7d' } // Token will expire in 1 hour
+      );
+  
+      // Send the token in the response
+      res.json({ token });
+    } catch (err) {
+      console.error('Login error:', err);
+      res.status(500).json({ message: 'Server error' });
+    }
+  };
+  
+  export const getAdminStats = async (req, res) => {
+    try {
+      const totalStudents = await Student.countDocuments();
+      const totalDrivers = await Driver.countDocuments();
+      console.log(totalStudents,totalDrivers);
+  
+      res.status(200).json({
+        totalStudents,
+        totalDrivers,
+      });
+    } catch (error) {
+      console.error("Failed to fetch admin stats:", error);
+      res.status(500).json({ message: "Server Error" });
+    }
+  };
+  

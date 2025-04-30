@@ -2,31 +2,36 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
 const ManageStudents = () => {
-  const [students, setStudents] = useState([]); // Make sure it is an array initially
-  const [newStudent, setNewStudent] = useState({ name: '', email: '' });
+  const [students, setStudents] = useState([]);
+  const [newStudent, setNewStudent] = useState({
+    name: '',
+    rollNumber: '',
+    busNumber: '',
+    stop: '',
+  });
   const [isEditing, setIsEditing] = useState(false);
   const [editStudentId, setEditStudentId] = useState(null);
 
-  // Fetch the students from the backend
   useEffect(() => {
     fetchStudents();
   }, []);
 
   const fetchStudents = async () => {
     try {
-      const response = await axios.get('/api/students');
-      setStudents(response.data);  // Ensure the response data is an array
+      const response = await axios.get('http://localhost:8000/admins/students');
+      setStudents(response.data.data);
     } catch (error) {
       console.error('Error fetching students:', error);
     }
   };
 
   const handleAddStudent = async () => {
-    if (newStudent.name && newStudent.email) {
+    const { name, rollNumber, busNumber, stop } = newStudent;
+    if (name && rollNumber && busNumber && stop) {
       try {
-        const response = await axios.post('/api/students', newStudent);
-        setStudents([...students, response.data]);
-        setNewStudent({ name: '', email: '' });
+        const response = await axios.post('http://localhost:8000/admins/students', newStudent);
+        setStudents([...students, response.data.data]);
+        setNewStudent({ name: '', rollNumber: '', busNumber: '', stop: '' });
       } catch (error) {
         console.error('Error adding student:', error);
       }
@@ -36,22 +41,28 @@ const ManageStudents = () => {
   };
 
   const handleEditStudent = (id) => {
-    const student = students.find((student) => student.id === id);
-    setNewStudent({ name: student.name, email: student.email });
+    const student = students.find((student) => student._id === id);
+    setNewStudent({
+      name: student.name,
+      rollNumber: student.rollNumber,
+      busNumber: student.busNumber,
+      stop: student.stop,
+    });
     setIsEditing(true);
     setEditStudentId(id);
   };
 
   const handleUpdateStudent = async () => {
-    if (newStudent.name && newStudent.email) {
+    const { name, rollNumber, busNumber, stop } = newStudent;
+    if (name && rollNumber && busNumber && stop) {
       try {
-        const response = await axios.put(`/api/students/${editStudentId}`, newStudent);
+        const response = await axios.put(`http://localhost:8000/admins/students/${editStudentId}`, newStudent);
         setStudents(
           students.map((student) =>
-            student.id === editStudentId ? { ...student, ...response.data } : student
+            student._id === editStudentId ? { ...student, ...response.data } : student
           )
         );
-        setNewStudent({ name: '', email: '' });
+        setNewStudent({ name: '', rollNumber: '', busNumber: '', stop: '' });
         setIsEditing(false);
         setEditStudentId(null);
       } catch (error) {
@@ -64,8 +75,8 @@ const ManageStudents = () => {
 
   const handleDeleteStudent = async (id) => {
     try {
-      await axios.delete(`/api/students/${id}`);
-      setStudents(students.filter((student) => student.id !== id));
+      await axios.delete(`http://localhost:8000/admins/students/${id}`);
+      setStudents(students.filter((student) => student._id !== id));
     } catch (error) {
       console.error('Error deleting student:', error);
     }
@@ -84,18 +95,32 @@ const ManageStudents = () => {
             placeholder="Name"
             value={newStudent.name}
             onChange={(e) => setNewStudent({ ...newStudent, name: e.target.value })}
-            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+            className="w-full p-3 border border-gray-300 rounded-lg"
           />
           <input
-            type="email"
-            placeholder="Email"
-            value={newStudent.email}
-            onChange={(e) => setNewStudent({ ...newStudent, email: e.target.value })}
-            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+            type="text"
+            placeholder="Roll Number"
+            value={newStudent.rollNumber}
+            onChange={(e) => setNewStudent({ ...newStudent, rollNumber: e.target.value })}
+            className="w-full p-3 border border-gray-300 rounded-lg"
+          />
+          <input
+            type="text"
+            placeholder="Bus Number"
+            value={newStudent.busNumber}
+            onChange={(e) => setNewStudent({ ...newStudent, busNumber: e.target.value })}
+            className="w-full p-3 border border-gray-300 rounded-lg"
+          />
+          <input
+            type="text"
+            placeholder="Stop"
+            value={newStudent.stop}
+            onChange={(e) => setNewStudent({ ...newStudent, stop: e.target.value })}
+            className="w-full p-3 border border-gray-300 rounded-lg"
           />
           <button
             onClick={isEditing ? handleUpdateStudent : handleAddStudent}
-            className="w-full py-3 mt-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full py-3 mt-4 bg-yellow-400 text-white rounded-lg hover:bg-yellow-500"
           >
             {isEditing ? 'Update Student' : 'Add Student'}
           </button>
@@ -108,25 +133,31 @@ const ManageStudents = () => {
           <thead>
             <tr>
               <th className="py-3 px-4 border-b">Name</th>
-              <th className="py-3 px-4 border-b">Email</th>
+              <th className="py-3 px-4 border-b">Roll No</th>
+              <th className="py-3 px-4 border-b">Bus No</th>
+              <th className="py-3 px-4 border-b">Stop</th>
               <th className="py-3 px-4 border-b">Actions</th>
             </tr>
           </thead>
           <tbody>
-            {Array.isArray(students) && students.length > 0 ? (
+            {students.length > 0 ? (
               students.map((student) => (
                 <tr key={student.id} className="hover:bg-gray-50">
                   <td className="py-3 px-4 border-b">{student.name}</td>
-                  <td className="py-3 px-4 border-b">{student.email}</td>
+                  <td className="py-3 px-4 border-b">{student.rollNumber}</td>
+                  <td className="py-3 px-4 border-b">{student.busNumber}</td>
+                  <td className="py-3 px-4 border-b">{student.stop}</td>
                   <td className="py-3 px-4 border-b">
                     <button
-                      onClick={() => handleEditStudent(student.id)}
+                      onClick={() => handleEditStudent(student._id)}
                       className="text-blue-600 hover:text-blue-800 mr-4"
                     >
                       Edit
                     </button>
                     <button
-                      onClick={() => handleDeleteStudent(student.id)}
+                      onClick={() => {
+                        handleDeleteStudent(student._id)
+                      }}
                       className="text-red-600 hover:text-red-800"
                     >
                       Delete
@@ -136,7 +167,7 @@ const ManageStudents = () => {
               ))
             ) : (
               <tr>
-                <td colSpan="3" className="py-3 px-4 text-center">No students available</td>
+                <td colSpan="5" className="py-3 px-4 text-center">No students available</td>
               </tr>
             )}
           </tbody>

@@ -1,53 +1,95 @@
 // pages/AdminDashboard.jsx
-import React from "react";
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
 import { FaUsers, FaBus, FaRegChartBar } from "react-icons/fa";
-import { Line } from 'react-chartjs-2';
-import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
+import { Line } from "react-chartjs-2";
+import axios from "axios";
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend,
+} from "chart.js";
 
-// Register chart.js components
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
+// Register Chart.js components
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Title,
+  Tooltip,
+  Legend
+);
 
 const AdminDashboard = () => {
+  const navigate = useNavigate();
+
   const [stats, setStats] = useState({
-    totalStudents: 200,
-    totalDrivers: 15,
-    totalBuses: 10,
+    totalStudents: 0,
+    totalDrivers: 0,
+    totalBuses: 3,
   });
 
+  // Fetch real data from backend
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const res = await axios.get("http:localhost:8000/admins/stats", {
+          withCredentials: true,
+        });
+        setStats(res.data);
+        console.log(res.data);
+      } catch (err) {
+        console.error("Failed to fetch stats:", err);
+      }
+    };
+
+    fetchStats();
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    navigate('/login');
+  };
+
+  // Dummy chart data for now
   const data = {
-    labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
+    labels: ["January", "February", "March", "April", "May", "June", "July"],
     datasets: [
       {
-        label: 'Students Joined',
+        label: "Students Joined",
         data: [30, 40, 50, 60, 70, 80, 90],
-        borderColor: 'rgba(75, 192, 192, 1)',
+        borderColor: "rgba(75, 192, 192, 1)",
         fill: false,
       },
       {
-        label: 'Drivers Joined',
+        label: "Drivers Joined",
         data: [2, 4, 6, 8, 10, 12, 15],
-        borderColor: 'rgba(255, 99, 132, 1)',
+        borderColor: "rgba(255, 99, 132, 1)",
         fill: false,
-      }
+      },
     ],
   };
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
-      {/* Admin Dashboard Header */}
+      {/* Header */}
       <header className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-semibold text-gray-800">Admin Dashboard</h1>
-        <Link
-          to="/login"
-          className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition duration-300"
+        <button
+          onClick={handleLogout}
+          className="px-4 py-2 bg-yellow-400 text-white rounded-lg hover:bg-yellow-500 transition duration-300"
         >
           Logout
-        </Link>
+        </button>
       </header>
 
-      {/* Stats Overview */}
+      {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
         <div className="bg-white p-6 rounded-lg shadow-md flex items-center justify-between">
           <div>
@@ -72,20 +114,20 @@ const AdminDashboard = () => {
         </div>
       </div>
 
-      {/* Graph Section */}
+      {/* Chart */}
       <div className="bg-white p-6 rounded-lg shadow-md mb-6">
         <h2 className="text-2xl font-semibold text-gray-800 mb-4">Student & Driver Growth</h2>
         <Line data={data} />
       </div>
 
-      {/* Manage Students and Drivers */}
+      {/* Manage Buttons */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="bg-white p-6 rounded-lg shadow-md">
           <h2 className="text-xl font-semibold text-gray-800 mb-4">Manage Students</h2>
           <p className="text-gray-600 mb-4">View, edit, or remove students from the database.</p>
           <Link
             to="/admin/students"
-            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition duration-300"
+            className="px-4 py-2 bg-yellow-400 text-white rounded-lg hover:bg-yellow-500 transition duration-300"
           >
             Manage Students
           </Link>
@@ -95,7 +137,7 @@ const AdminDashboard = () => {
           <p className="text-gray-600 mb-4">View, edit, or remove drivers from the database.</p>
           <Link
             to="/admin/drivers"
-            className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition duration-300"
+            className="px-4 py-2 bg-yellow-400 text-white rounded-lg hover:bg-yellow-500 transition duration-300"
           >
             Manage Drivers
           </Link>

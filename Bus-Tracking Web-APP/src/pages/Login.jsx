@@ -1,101 +1,107 @@
-// pages/Login.jsx
-import React from 'react';
-import { useState } from 'react';
+import React, { useState } from 'react';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 const Login = () => {
-  const [userType, setUserType] = useState('student'); // Default: student
+  const [userType, setUserType] = useState('');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (username === '' || password === '') {
-      setError('Please enter both username and password');
-    } else {
-      setError('');
-      // Proceed with login based on user type (student/driver)
-      console.log(`Logging in as ${userType} with ${username} and ${password}`);
-      // Redirect or handle successful login
+
+    if (!username || !password) {
+      setError('Please enter both email/ID and password');
+      return;
+    }
+
+    try {
+      const endpoint =
+        userType === 'parent'
+          ? 'http://localhost:8000/parents/login'
+          : 'http://localhost:8000/drivers/login';
+
+      const payload =
+        userType === 'parent'
+          ? { email: username, password }
+          : { driverId: username, password };
+
+      const res = await axios.post(endpoint, payload);
+
+      const { token } = res.data;
+      localStorage.setItem('token', token);
+      localStorage.setItem('userType', userType);
+
+      if (userType === 'parent') {
+        navigate('/parent/dashboard');
+      } else {
+        navigate('/driver/dashboard');
+      }
+    } catch (err) {
+      setError(err.response?.data?.error || 'Login failed');
     }
   };
 
   return (
-    <div className="min-h-screen bg-cover bg-center" style={{ backgroundImage: 'url(/path/to/your/image.jpg)' }}>
-      <div className="bg-opacity-50 bg-gray-800 min-h-screen flex items-center justify-center py-8">
-        <div className="bg-white p-8 rounded-xl shadow-lg w-full max-w-md space-y-8">
-          <h2 className="text-4xl font-semibold text-center text-gray-800">Login</h2>
-          <p className="text-center text-gray-500">Please select your user type and enter your details.</p>
+    <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+      {/* <div>
+        <img src="/logo.png" className='w-5' alt="" />
+      </div> */}
+      <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
+        <h2 className="text-3xl font-semibold text-center mb-6">Login</h2>
 
-          {error && (
-            <div className="bg-red-100 text-red-800 text-sm p-2 rounded-md">
-              {error}
-            </div>
-          )}
+        {error && <div className="text-red-600 mb-4">{error}</div>}
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* User Type Selection */}
-            <div className="relative">
-              <label htmlFor="userType" className="block text-gray-700">Select User Type</label>
-              <select
-                id="userType"
-                className="w-full p-3 mt-2 border rounded-md border-gray-300 focus:ring-2 focus:ring-indigo-400 transition-all"
-                value={userType}
-                onChange={(e) => setUserType(e.target.value)}
-              >
-                <option value="student">Student</option>
-                <option value="driver">Driver</option>
-              </select>
-            </div>
-
-            {/* Username Input (Roll number for student, Driver ID for driver) */}
-            <div className="relative">
-              <label htmlFor="username" className="block text-gray-700">
-                {userType === 'student' ? 'Roll Number' : 'Driver ID'}
-              </label>
-              <input
-                type="text"
-                id="username"
-                className="w-full p-3 mt-2 border rounded-md border-gray-300 focus:ring-2 focus:ring-indigo-400 transition-all"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                placeholder={userType === 'student' ? 'Enter your roll number' : 'Enter your driver ID'}
-              />
-            </div>
-
-            {/* Password Input */}
-            <div className="relative">
-              <label htmlFor="password" className="block text-gray-700">Password</label>
-              <input
-                type="password"
-                id="password"
-                className="w-full p-3 mt-2 border rounded-md border-gray-300 focus:ring-2 focus:ring-indigo-400 transition-all"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter your password"
-              />
-            </div>
-
-            {/* Remember Me & Forgot Password Links */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <input type="checkbox" id="remember" className="mr-2" />
-                <label htmlFor="remember" className="text-gray-600">Remember me</label>
-              </div>
-              <a href="/forgot-password" className="text-indigo-600 text-sm hover:underline">
-                Forgot password?
-              </a>
-            </div>
-
-            {/* Submit Button */}
-            <button
-              type="submit"
-              className="w-full bg-indigo-600 text-white p-3 rounded-md text-lg hover:bg-indigo-700 transition duration-200 ease-in-out transform hover:scale-105"
+        <form onSubmit={handleSubmit} className="space-y-5">
+          {/* User Type */}
+          <div>
+            <label className="block mb-1 text-gray-700">Select Role</label>
+            <select
+              value={userType}
+              onChange={(e) => setUserType(e.target.value)}
+              className="w-full p-2 border border-gray-300 rounded"
             >
-              Login
-            </button>
-          </form>
-        </div>
+              <option value="parent">Parent</option>
+              <option value="driver">Driver</option>
+            </select>
+          </div>
+
+          {/* Email/ID */}
+          <div>
+            <label className="block mb-1 text-gray-700">
+              {userType === 'parent' ? 'Email' : 'Driver ID'}
+            </label>
+            <input
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              placeholder={userType === 'parent' ? 'Enter your email' : 'Enter your Driver ID'}
+              className="w-full p-2 border border-gray-300 rounded"
+            />
+          </div>
+
+          {/* Password */}
+          <div>
+            <label className="block mb-1 text-gray-700">Password</label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Enter your password"
+              className="w-full p-2 border border-gray-300 rounded"
+            />
+          </div>
+
+          {/* Submit */}
+          <button
+            type="submit"
+            className="w-full bg-yellow-400 text-white py-2 rounded hover:bg-yellow-500 transition"
+          >
+            Login
+          </button>
+        </form>
       </div>
     </div>
   );

@@ -1,7 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'; // Corrected import for BrowserRouter
 import Login from './pages/Login';
-import StudentDashboard from './pages/StudentDashboard';
+import ParentDashboard from './pages/parentDashboard';
 import DriverDashboard from './pages/DriverDashboard';
 import Home from './pages/Home';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -10,6 +10,8 @@ import ManageDrivers from './pages/ManageDrivers';
 import ManageStudents from './pages/ManageStudents';
 import ErrorPage from './pages/ErrorPage';
 import ErrorAuth from './pages/ErrorAuth';
+import Register from './pages/ParentSignup';
+import AdminLogin from './pages/AdminLogin'
 
 function App() {
   return (
@@ -17,40 +19,33 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
-
+        <Route path='/register' element={<Register />} />
         {/* Protected Admin Routes */}
+        <Route path='/admin/login' element={<AdminLogin/>}/>
         <Route
           path="/admin/dashboard"
           element={
-            <ProtectedRoute allowedRole="admin">
               <AdminDashboard />
-            </ProtectedRoute>
           }
         />
         <Route
           path="/admin/students"
           element={
-            <ProtectedRoute allowedRole="admin">
               <ManageStudents />
-            </ProtectedRoute>
           }
         />
         <Route
           path="/admin/drivers"
           element={
-            <ProtectedRoute allowedRole="admin">
               <ManageDrivers />
-            </ProtectedRoute>
           }
         />
 
         {/* Protected Student Route */}
         <Route
-          path="/student/dashboard"
+          path="/parent/dashboard"
           element={
-            <ProtectedRoute allowedRole="student">
-              <StudentDashboard />
-            </ProtectedRoute>
+              <ParentDashboard />
           }
         />
 
@@ -58,9 +53,7 @@ function App() {
         <Route
           path="/driver/dashboard"
           element={
-            <ProtectedRoute allowedRole="driver">
               <DriverDashboard />
-            </ProtectedRoute>
           }
         />
         <Route path='/error' element={<ErrorAuth/>} />

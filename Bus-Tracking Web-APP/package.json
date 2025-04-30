@@ -12,8 +12,10 @@
   "dependencies": {
     "@react-google-maps/api": "^2.20.6",
     "@tailwindcss/vite": "^4.1.4",
-    "axios": "^1.8.4",
+    "axios": "^1.9.0",
     "chart.js": "^4.4.9",
+    "jwt-decode": "^4.0.0",
+    "jwt-decoder": "^0.0.0",
     "react": "^19.0.0",
     "react-chartjs-2": "^5.3.0",
     "react-dom": "^19.0.0",

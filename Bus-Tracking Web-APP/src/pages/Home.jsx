@@ -2,9 +2,15 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
+
 const Home = () => {
   return (
     <div className="bg-gray-100 min-h-screen flex flex-col items-center justify-center py-8">
+      <div className='h-73 w-75 rounded-full bg-amber-700 bg-[url("/logo.png")] bg-no-repeat bg-cover bg-center'>
+      </div>
+      <div className='text-5xl font-extrabold text-gray-800 mb-4 mt-4 text-yellow-500'>
+        <h1 >Kid Bus</h1>
+      </div>
       <header className="text-center mb-12">
         <h1 className="text-5xl font-extrabold text-gray-800 mb-4">Welcome to the School Bus Tracker</h1>
         <p className="text-lg text-gray-600 mb-4">
@@ -23,7 +29,7 @@ const Home = () => {
           </p>
           <Link
             to="/login"
-            className="bg-blue-600 text-white px-6 py-3 rounded-md text-lg hover:bg-blue-700 transition"
+            className="bg-yellow-400 text-white px-6 py-3 rounded-md text-lg hover:bg-yellow-500 transition"
           >
             Student Login
           </Link>
@@ -36,7 +42,7 @@ const Home = () => {
           </p>
           <Link
             to="/login"
-            className="bg-green-600 text-white px-6 py-3 rounded-md text-lg hover:bg-green-700 transition"
+            className="bg-amber-400 text-white px-6 py-3 rounded-md text-lg hover:bg-yellow-500 transition"
           >
             Driver Login
           </Link>

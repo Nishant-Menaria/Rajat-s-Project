@@ -2,31 +2,32 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
 const ManageDrivers = () => {
-  const [drivers, setDrivers] = useState([]); // Make sure it is an array initially
-  const [newDriver, setNewDriver] = useState({ name: '', email: '', licenseNumber: '' });
+  const [drivers, setDrivers] = useState([]);
+  const [newDriver, setNewDriver] = useState({ name: '', phone: '', licenseNumber: '', busNumber: '' });
   const [isEditing, setIsEditing] = useState(false);
   const [editDriverId, setEditDriverId] = useState(null);
 
-  // Fetch the drivers from the backend
   useEffect(() => {
     fetchDrivers();
   }, []);
 
   const fetchDrivers = async () => {
     try {
-      const response = await axios.get('/api/drivers');
-      setDrivers(response.data); // Ensure the response data is an array
+      const response = await axios.get('http://localhost:8000/admins/drivers');
+      setDrivers(response.data.data);
     } catch (error) {
       console.error('Error fetching drivers:', error);
     }
   };
 
   const handleAddDriver = async () => {
-    if (newDriver.name && newDriver.email && newDriver.licenseNumber) {
+    const { name, phone, licenseNumber, busNumber } = newDriver;
+    if (name && phone && licenseNumber && busNumber) {
       try {
-        const response = await axios.post('/api/drivers', newDriver);
+        const response = await axios.post('http://localhost:8000/admins/drivers', newDriver);
+
         setDrivers([...drivers, response.data]);
-        setNewDriver({ name: '', email: '', licenseNumber: '' });
+        setNewDriver({ name: '', phone: '', licenseNumber: '', busNumber: '' });
       } catch (error) {
         console.error('Error adding driver:', error);
       }
@@ -36,22 +37,28 @@ const ManageDrivers = () => {
   };
 
   const handleEditDriver = (id) => {
-    const driver = drivers.find((driver) => driver.id === id);
-    setNewDriver({ name: driver.name, email: driver.email, licenseNumber: driver.licenseNumber });
+    const driver = drivers.find((driver) => driver._id === id);
+    setNewDriver({
+      name: driver.name,
+      phone: driver.phone,
+      licenseNumber: driver.licenseNumber,
+      busNumber: driver.busNumber,
+    });
     setIsEditing(true);
     setEditDriverId(id);
   };
 
   const handleUpdateDriver = async () => {
-    if (newDriver.name && newDriver.email && newDriver.licenseNumber) {
+    const { name, phone, licenseNumber, busNumber } = newDriver;
+    if (name && phone && licenseNumber && busNumber) {
       try {
-        const response = await axios.put(`/api/drivers/${editDriverId}`, newDriver);
+        const response = await axios.put(`http://localhost:8000/admins/drivers/${editDriverId}`, newDriver);
         setDrivers(
           drivers.map((driver) =>
-            driver.id === editDriverId ? { ...driver, ...response.data } : driver
+            driver._id === editDriverId ? { ...driver, ...response.data } : driver
           )
         );
-        setNewDriver({ name: '', email: '', licenseNumber: '' });
+        setNewDriver({ name: '', phone: '', licenseNumber: '', busNumber: '' });
         setIsEditing(false);
         setEditDriverId(null);
       } catch (error) {
@@ -64,8 +71,8 @@ const ManageDrivers = () => {
 
   const handleDeleteDriver = async (id) => {
     try {
-      await axios.delete(`/api/drivers/${id}`);
-      setDrivers(drivers.filter((driver) => driver.id !== id));
+      await axios.delete(`http://localhost:8000/admins/drivers/${id}`);
+      setDrivers(drivers.filter((driver) => driver._id !== id));
     } catch (error) {
       console.error('Error deleting driver:', error);
     }
@@ -87,10 +94,10 @@ const ManageDrivers = () => {
             className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
           />
           <input
-            type="email"
-            placeholder="Email"
-            value={newDriver.email}
-            onChange={(e) => setNewDriver({ ...newDriver, email: e.target.value })}
+            type="text"
+            placeholder="Phone"
+            value={newDriver.phone}
+            onChange={(e) => setNewDriver({ ...newDriver, phone: e.target.value })}
             className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
           />
           <input
@@ -100,9 +107,16 @@ const ManageDrivers = () => {
             onChange={(e) => setNewDriver({ ...newDriver, licenseNumber: e.target.value })}
             className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
           />
+          <input
+            type="text"
+            placeholder="Bus Number"
+            value={newDriver.busNumber}
+            onChange={(e) => setNewDriver({ ...newDriver, busNumber: e.target.value })}
+            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+          />
           <button
             onClick={isEditing ? handleUpdateDriver : handleAddDriver}
-            className="w-full py-3 mt-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full py-3 mt-4 bg-yellow-400 text-white rounded-lg hover:bg-yellow-500 focus:outline-none focus:ring-2 focus:ring-yellow-700"
           >
             {isEditing ? 'Update Driver' : 'Add Driver'}
           </button>
@@ -115,8 +129,9 @@ const ManageDrivers = () => {
           <thead>
             <tr>
               <th className="py-3 px-4 border-b">Name</th>
-              <th className="py-3 px-4 border-b">Email</th>
+              <th className="py-3 px-4 border-b">Phone</th>
               <th className="py-3 px-4 border-b">License Number</th>
+              <th className="py-3 px-4 border-b">Bus Number</th>
               <th className="py-3 px-4 border-b">Actions</th>
             </tr>
           </thead>
@@ -125,17 +140,18 @@ const ManageDrivers = () => {
               drivers.map((driver) => (
                 <tr key={driver.id} className="hover:bg-gray-50">
                   <td className="py-3 px-4 border-b">{driver.name}</td>
-                  <td className="py-3 px-4 border-b">{driver.email}</td>
+                  <td className="py-3 px-4 border-b">{driver.phone}</td>
                   <td className="py-3 px-4 border-b">{driver.licenseNumber}</td>
+                  <td className="py-3 px-4 border-b">{driver.busNumber}</td>
                   <td className="py-3 px-4 border-b">
                     <button
-                      onClick={() => handleEditDriver(driver.id)}
+                      onClick={() => handleEditDriver(driver._id)}
                       className="text-blue-600 hover:text-blue-800 mr-4"
                     >
                       Edit
                     </button>
                     <button
-                      onClick={() => handleDeleteDriver(driver.id)}
+                      onClick={() => handleDeleteDriver(driver._id)}
                       className="text-red-600 hover:text-red-800"
                     >
                       Delete
@@ -145,7 +161,7 @@ const ManageDrivers = () => {
               ))
             ) : (
               <tr>
-                <td colSpan="4" className="py-3 px-4 text-center">No drivers available</td>
+                <td colSpan="5" className="py-3 px-4 text-center">No drivers available</td>
               </tr>
             )}
           </tbody>
