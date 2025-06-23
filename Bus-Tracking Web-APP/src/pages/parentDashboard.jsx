@@ -113,7 +113,7 @@ const ParentDashboard = () => {
                 <div className="space-x-3">
                   <button
                     className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700"
-                    onClick={() => alert(`Tracking Student: ${student.name}`)}
+                    onClick={() => navigate('/track-student')}
                   >
                     Track
                   </button>

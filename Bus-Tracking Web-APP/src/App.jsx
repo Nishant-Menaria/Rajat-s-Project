@@ -12,6 +12,7 @@ import ErrorPage from './pages/ErrorPage';
 import ErrorAuth from './pages/ErrorAuth';
 import Register from './pages/ParentSignup';
 import AdminLogin from './pages/AdminLogin'
+import TrackingStudent from './pages/TrakingStudent';
 
 function App() {
   return (
@@ -58,6 +59,7 @@ function App() {
         />
         <Route path='/error' element={<ErrorAuth/>} />
         <Route path="*" element={<ErrorPage />} />
+        <Route path="/track-student" element={<TrackingStudent />} />
         
       </Routes>
     </Router>

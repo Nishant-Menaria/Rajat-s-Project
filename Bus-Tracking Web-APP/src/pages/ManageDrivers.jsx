@@ -25,7 +25,7 @@ const ManageDrivers = () => {
     if (name && phone && licenseNumber && busNumber) {
       try {
         const response = await axios.post('http://localhost:8000/admins/drivers', newDriver);
-
+        alert(`Driver added successfully!\nDriver ID: ${response.data.driverId}\nDefault Password: 123456789`);
         setDrivers([...drivers, response.data]);
         setNewDriver({ name: '', phone: '', licenseNumber: '', busNumber: '' });
       } catch (error) {
@@ -82,8 +82,11 @@ const ManageDrivers = () => {
     <div className="max-w-4xl mx-auto p-6 bg-white shadow-lg rounded-lg">
       <h1 className="text-3xl font-semibold text-gray-800 text-center mb-6">Manage Drivers</h1>
 
+      {/* Add/Edit Driver Form */}
       <div className="bg-gray-100 p-6 rounded-lg shadow-md mb-6">
-        <h2 className="text-xl font-medium text-gray-700 mb-4">{isEditing ? 'Edit Driver' : 'Add New Driver'}</h2>
+        <h2 className="text-xl font-medium text-gray-700 mb-4">
+          {isEditing ? 'Edit Driver' : 'Add New Driver'}
+        </h2>
 
         <div className="space-y-4">
           <input
@@ -123,11 +126,13 @@ const ManageDrivers = () => {
         </div>
       </div>
 
+      {/* Driver List Table */}
       <div className="bg-white p-6 rounded-lg shadow-md">
         <h2 className="text-xl font-medium text-gray-700 mb-4">Driver List</h2>
         <table className="min-w-full text-sm text-left text-gray-500">
           <thead>
             <tr>
+              <th className="py-3 px-4 border-b">Driver ID</th>
               <th className="py-3 px-4 border-b">Name</th>
               <th className="py-3 px-4 border-b">Phone</th>
               <th className="py-3 px-4 border-b">License Number</th>
@@ -138,7 +143,8 @@ const ManageDrivers = () => {
           <tbody>
             {Array.isArray(drivers) && drivers.length > 0 ? (
               drivers.map((driver) => (
-                <tr key={driver.id} className="hover:bg-gray-50">
+                <tr key={driver._id} className="hover:bg-gray-50">
+                  <td className="py-3 px-4 border-b">{driver.driverId || 'N/A'}</td>
                   <td className="py-3 px-4 border-b">{driver.name}</td>
                   <td className="py-3 px-4 border-b">{driver.phone}</td>
                   <td className="py-3 px-4 border-b">{driver.licenseNumber}</td>
@@ -161,7 +167,7 @@ const ManageDrivers = () => {
               ))
             ) : (
               <tr>
-                <td colSpan="5" className="py-3 px-4 text-center">No drivers available</td>
+                <td colSpan="6" className="py-3 px-4 text-center">No drivers available</td>
               </tr>
             )}
           </tbody>

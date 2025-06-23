@@ -29,33 +29,37 @@ const Login = () => {
           : { driverId: username, password };
 
       const res = await axios.post(endpoint, payload);
-
       const { token } = res.data;
+
       localStorage.setItem('token', token);
       localStorage.setItem('userType', userType);
 
-      if (userType === 'parent') {
-        navigate('/parent/dashboard');
-      } else {
+      // Save busNumber for driver
+      if (userType === 'driver' && res.data.driver?.busNumber) {
+        localStorage.setItem('busNumber', res.data.driver.busNumber);
         navigate('/driver/dashboard');
+      } else {
+        navigate('/parent/dashboard');
       }
+
     } catch (err) {
       setError(err.response?.data?.error || 'Login failed');
     }
   };
 
+  const handleRegisterRedirect = () => {
+    navigate('/register/parent');
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-      {/* <div>
-        <img src="/logo.png" className='w-5' alt="" />
-      </div> */}
       <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
         <h2 className="text-3xl font-semibold text-center mb-6">Login</h2>
 
         {error && <div className="text-red-600 mb-4">{error}</div>}
 
         <form onSubmit={handleSubmit} className="space-y-5">
-          {/* User Type */}
+          {/* Role */}
           <div>
             <label className="block mb-1 text-gray-700">Select Role</label>
             <select
@@ -63,12 +67,13 @@ const Login = () => {
               onChange={(e) => setUserType(e.target.value)}
               className="w-full p-2 border border-gray-300 rounded"
             >
+              <option value="">-- Select --</option>
               <option value="parent">Parent</option>
               <option value="driver">Driver</option>
             </select>
           </div>
 
-          {/* Email/ID */}
+          {/* Username */}
           <div>
             <label className="block mb-1 text-gray-700">
               {userType === 'parent' ? 'Email' : 'Driver ID'}
@@ -94,7 +99,7 @@ const Login = () => {
             />
           </div>
 
-          {/* Submit */}
+          {/* Login Button */}
           <button
             type="submit"
             className="w-full bg-yellow-400 text-white py-2 rounded hover:bg-yellow-500 transition"
@@ -102,6 +107,17 @@ const Login = () => {
             Login
           </button>
         </form>
+
+        {/* Register Button */}
+        <div className="mt-6 text-center">
+          <p className="text-gray-700 mb-2">Don't have an account?</p>
+          <button
+            onClick={handleRegisterRedirect}
+            className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 transition"
+          >
+            Register as Parent
+          </button>
+        </div>
       </div>
     </div>
   );

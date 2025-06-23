@@ -1,4 +1,7 @@
 import Driver from '../models/Driver.js'
+import bcrypt  from 'bcryptjs';
+import jwt from 'jsonwebtoken'
+ import Student from '../models/Student.js';
 
 export const getAllDrivers = async (req, res) => {
   try {
@@ -46,3 +49,34 @@ export const deleteDriver = async (req, res) => {
     res.status(400).json({ message: 'Delete failed' });
   }
 };
+
+export const driverLogin = async (req, res) => {
+  const { driverId, password } = req.body;
+
+  try {
+    const driver = await Driver.findOne({ driverId });
+    if (!driver) return res.status(400).json({ error: 'Invalid credentials' });
+
+    const isMatch = await bcrypt.compare(password, driver.password);
+    if (!isMatch) return res.status(400).json({ error: 'Invalid credentials' });
+
+    const token = jwt.sign({ id: driver._id, type: driver.type }, process.env.JWT_SECRET, {
+      expiresIn: '7d',
+    });
+
+    res.json({ token, driver });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Login error' });
+  }
+}
+
+export const getStudents = async (req, res) => {
+  const { busNumber } = req.params;
+  try {
+    const students = await Student.find({ busNumber });
+    res.json({ students });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch students' });
+  }
+}
