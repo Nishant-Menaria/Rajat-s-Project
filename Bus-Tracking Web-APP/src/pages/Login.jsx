@@ -48,7 +48,7 @@ const Login = () => {
   };
 
   const handleRegisterRedirect = () => {
-    navigate('/register/parent');
+    navigate('/register');
   };
 
   return (
